@@ -1,0 +1,13 @@
+compound_id,compound,complex_type
+0,water,simple
+1,Glucose,simple
+2,K2HPO4,simple
+3,MgSO4 x 7 H2O,simple
+4,NaCl,simple
+5,L-Asparagine,simple
+6,Glycerol,simple
+7,Yeast extract,complex
+8,Beef extract,complex
+9,N-Z amine,complex
+10,Peptone,complex
+11,Malt extract,complex

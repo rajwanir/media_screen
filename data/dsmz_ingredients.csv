@@ -1,0 +1,33 @@
+compound,compound_id,complex_compound
+Peptone,1,1
+Yeast extract,16,1
+Casamino acids,101,1
+Corn steep liquor,1609,1
+Carrot,1612,1
+Potato,1606,1
+Beef extract,85,1
+N-Z amine,1608,1
+Oatmeal,471,1
+Starch,199,1
+Malt extract,116,1
+Glucose,5,0
+Glycerol,72,0
+Sucrose,108,0
+L-Asparagine,829,0
+Maltose,171,0
+CaCl2 x 2 H2O,7,0
+MgSO4 x 7 H2O,8,0
+KH2PO4,11,0
+FeSO4 x 7 H2O,12,0
+CaCO3,13,0
+(NH4)2SO4,27,0
+NH4Cl,42,0
+NaCl,43,0
+KCl,61,0
+Na-pyruvate,113,0
+Na2HPO4 x 2 H2O,181,0
+NaNO3,187,0
+KNO3,191,0
+FeSO4,595,0
+CoCl2,692,0
+Sodium Thiosulfate,1126,0
