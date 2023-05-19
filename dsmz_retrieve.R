@@ -120,15 +120,26 @@ plates= expand.grid(paste0("P",1:no_of_plates),
 paste0(expand.grid(LETTERS[1:8],1:12)$Var1,
        expand.grid(LETTERS[1:8],1:12)$Var2)
 )
-paste(plates$Var1,plates$Var2,sep="@")
+
+plates = mutate(plates,plate_well=paste(Var1,Var2,sep="@"))
+#paste(plates$Var1,plates$Var2,sep="@")
+plates = plates %>% arrange(Var1) # to arrange well wise, currently omits 2 wells per plate
 plates = tibble(components = set3,position = paste(plates$Var1,plates$Var2,sep="@")[1:length(set3)])
-plates = separate(plates,components,sep="-",into=paste0("component",1:6)) %>% pivot_longer(starts_with("component"),names_to="component_no",values_to="component")
-plates = filter(plates,component!=0)
+plates = separate(plates,components,sep="-",into=paste0("component",1:6)) %>% 
+pivot_longer(starts_with("component"),names_to="component_no",values_to="component")
 plates = separate(plates,col="position", sep="@",into=c("plate","well"))
 plates = left_join(plates,dsmz_components)
-plates = mutate(plates,vol = case_when(ot2_label=="glycerol"~transfervol*2,
-                                ot2_label=="water"~190,
-                                 TRUE~transfervol))
+plates = mutate(
+  plates,
+  vol = case_when(
+    ot2_label == "glycerol" ~ transfervol * 2,
+    ot2_label == "yeast_extract" ~ transfervol * 2,
+    ot2_label == "malt_extract" ~ transfervol * 2,
+    ot2_label == "water" ~ 190,
+    TRUE ~ transfervol
+  )
+)
 plates = plates %>% arrange(plate,component)
+plates = filter(plates,component!=0)
 
 write_csv(plates,"C:/Users/rajwanir2/Documents/Python Scripts/ot2_media_template.csv")
