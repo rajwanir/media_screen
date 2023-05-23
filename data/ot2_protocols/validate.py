@@ -17,7 +17,7 @@ scale=1
 ##protocol_template=protocol_template[protocol_template.plate.isin(['P1','P2','P3','P4','P5','P6','P7'])]
 
 
-# In[2]:
+# In[7]:
 
 
 protocol_template ={'plate':['P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','P1'],
@@ -26,6 +26,7 @@ protocol_template ={'plate':['P1','P1','P1','P1','P1','P1','P1','P1','P1','P1','
 'vol':[2,2,2,2,2,2,2,2,2,2,2,4,2,2,2,4,2,2,2,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,2,2,2,2,4,2,2,2,2,4,2,2,2,2,4,2,2,2,2,2,4,2,2,4,4,2,2,4,2,2,4,2,2,2,4,2,2,2,4,2,4,2,4,4,2,2,2,4,2,2,2,4,4,2,2,2,4,2,2,2,2,4,2,2,2,2,2,4,4,2,2,2,4,2,2,2,4,2,4,4,2,4,2,2,2,2,2,4,4,2,4,2,4,2,2,4,2,4,2,2,2,4,2,2,4,2,2,2,2,4,2,2,2,2,2,4,2,2,2,2,2,4,2,2,2,2,2,4,2,2,2,2,4,4,2,4,2,2,4,2,2,4,2,2,2,4,2,2,4,4,4]}
 
 protocol_template=pd.DataFrame(data=protocol_template)
+all_wells = list(set(protocol_template.well.tolist()))
 protocol_template.vol = protocol_template.vol * scale
 
 
@@ -84,18 +85,23 @@ def run(protocol: protocol_api.ProtocolContext):
    # for p in target_plates:
     p= 'P1'
     #add water
-    p1000.distribute(volume = 190*scale,
-                     source = water.wells()[0],
-                     dest = [plates[p].wells_by_name()[well_name] for well_name in list(set(protocol_template['well'].tolist()))])
-    #add components, changing tips between components
-    for c in component_names:
-        component_indices=protocol_template.index[(protocol_template.ot2_label==c) & (protocol_template.plate==p)].tolist()
-        trans_volumes = protocol_template[protocol_template.index.isin(component_indices)].vol.tolist() 
-        dest_wells = protocol_template[protocol_template.index.isin(component_indices)].well.tolist()
-        if len(list(filter(None, dest_wells))) == 0:
-             continue
-        p20.transfer(volume = trans_volumes,
-                     source=components[c],
-                     touch_tip=True,
-                     dest = [plates[p].wells_by_name()[well_name] for well_name in dest_wells])
+    # p1000.distribute(volume = 190*scale,
+    #                  source = water.wells()[0],
+    #                  dest = [plates[p].wells_by_name()[well_name] for well_name in list(set(protocol_template['well'].tolist()))])
+    # #add components, changing tips between components
+    # for c in component_names:
+    #     component_indices=protocol_template.index[(protocol_template.ot2_label==c) & (protocol_template.plate==p)].tolist()
+    #     trans_volumes = protocol_template[protocol_template.index.isin(component_indices)].vol.tolist() 
+    #     dest_wells = protocol_template[protocol_template.index.isin(component_indices)].well.tolist()
+    #     if len(list(filter(None, dest_wells))) == 0:
+    #          continue
+    #     p20.transfer(volume = trans_volumes,
+    #                  source=components[c],
+    #                  touch_tip=True,
+    #                  dest = [plates[p].wells_by_name()[well_name] for well_name in dest_wells])
+    ## inoculate
+    seed_culture = stock_rack.wells_by_name()['D6']
+    p20.distribute(volume = 1,
+                         source = seed_culture,
+                         dest = [plates[p].wells_by_name()[well_name] for well_name in all_wells])
 
