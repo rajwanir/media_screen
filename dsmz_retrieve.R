@@ -112,13 +112,14 @@ ggsave("plates.pdf", gridExtra::marrangeGrob(grobs = p_set3, nrow=2, ncol=1),
 #writing template for opentrons from set3(vector)
 no_of_plates=11
 transfervol=2
+all_wells = paste0(expand.grid(LETTERS[1:8],1:12)$Var1,
+                   expand.grid(LETTERS[1:8],1:12)$Var2)
 dsmz_components = read_csv("data/dsmz_ingredients_frequent.csv") # will use compound names from here
 dsmz_components$ot2_label = janitor::make_clean_names(tolower(dsmz_components$compound))
 dsmz_components = select(dsmz_components,ot2_label,component=compound_id)
 dsmz_components = mutate(dsmz_components,component=as.character(component))
 plates= expand.grid(paste0("P",1:no_of_plates),
-paste0(expand.grid(LETTERS[1:8],1:12)$Var1,
-       expand.grid(LETTERS[1:8],1:12)$Var2)
+                    all_wells
 )
 
 plates = mutate(plates,plate_well=paste(Var1,Var2,sep="@"))
@@ -143,3 +144,39 @@ plates = plates %>% arrange(plate,component)
 plates = filter(plates,component!=0)
 
 write_csv(plates,"C:/Users/rajwanir2/Documents/Python Scripts/ot2_media_template.csv")
+
+
+
+# for validataion
+plates = plates %>% mutate(media_id=paste(plate,well,sep="-"))
+all_media_ids = unique(plates$media_id)
+# 10,20,100
+positive_media_id=c("P1-A7" ,"P6-E7","P5-F4","P5-B8","P2-C6","P5-B8","P5-D3","P5-E8","P2-E4","P1-C10")
+control_media_id = sapply(c(10, 20, 40), function(s) {
+  set.seed(s)
+  all_media_ids[sample(x = 1:length(all_media_ids)[-which(all_media_ids %in% positive_media_id)],
+                       size = length(positive_media_id))]
+}) %>% as.vector()
+all_wells = paste0(expand.grid(LETTERS[1:8],1:12)$Var1,
+                   expand.grid(LETTERS[1:8],1:12)$Var2)
+
+
+pos_val_plate = plates %>% filter(media_id %in% positive_media_id)
+pos_val_plate = bind_rows(pos_val_plate,pos_val_plate,pos_val_plate) %>% arrange(media_id)
+pos_val_plate = left_join(pos_val_plate,
+          tibble(media_id=positive_media_id,
+                 new_well=all_wells[1:length(positive_media_id)],
+                 new_plate="P1")
+          )  
+
+
+control_val_plate = plates %>% filter(media_id %in% control_media_id) %>% arrange(media_id)
+control_val_plate = left_join(control_val_plate,
+          tibble(media_id=control_media_id,
+                 new_well=all_wells[-which(all_wells %in% pos_val_plate$new_well)][1:length(control_media_id)],
+                 new_plate="P1")
+)  
+
+validation_plate = bind_rows(pos_val_plate,control_val_plate)
+
+write_csv(validation_plate,"data/ot2_protocols/validation_template_96well.csv")
