@@ -11,7 +11,7 @@ import pandas as pd
 metadata = {'apiLevel': '2.13'}
 plate_type = "corning_96_wellplate_360ul_flat" # or thermoscientificnunc_96_wellplate_2000ul
 stock_holder = "thermoscientificnunc_96_wellplate_2000ul" # or thermoscientificnunc_96_wellplate_2000ul
-taget_plates = ['P8','P9','P10','P11']
+taget_plates = ['P1','P2','P3','P4','P5','P6','P7']
 scale=1
 #protocol_template=pd.read_csv("ot2_media_template.csv")
 ##protocol_template=protocol_template[protocol_template.plate.isin(['P1','P2','P3','P4','P5','P6','P7'])]
@@ -37,17 +37,17 @@ protocol_template.vol = protocol_template.vol * scale
 def run(protocol: protocol_api.ProtocolContext):
     #assinging plates
     plates = {}
-    # plates['P1'] = protocol.load_labware(plate_type, 5)
-    # plates['P2'] = protocol.load_labware(plate_type, 6)
-    # plates['P3'] = protocol.load_labware(plate_type, 7)
-    # plates['P4'] = protocol.load_labware(plate_type, 8)
-    # plates['P5'] = protocol.load_labware(plate_type, 9)
-    # plates['P6'] = protocol.load_labware(plate_type, 10)
-    # plates['P7'] = protocol.load_labware(plate_type, 11)
-    plates['P8'] = protocol.load_labware(plate_type, 5)
-    plates['P9'] = protocol.load_labware(plate_type, 6)
-    plates['P10'] = protocol.load_labware(plate_type, 7)
-    plates['P11'] = protocol.load_labware(plate_type, 8)
+    plates['P1'] = protocol.load_labware(plate_type, 5)
+    plates['P2'] = protocol.load_labware(plate_type, 6)
+    plates['P3'] = protocol.load_labware(plate_type, 7)
+    plates['P4'] = protocol.load_labware(plate_type, 8)
+    plates['P5'] = protocol.load_labware(plate_type, 9)
+    plates['P6'] = protocol.load_labware(plate_type, 10)
+    plates['P7'] = protocol.load_labware(plate_type, 11)
+#     plates['P8'] = protocol.load_labware(plate_type, 5)
+#     plates['P9'] = protocol.load_labware(plate_type, 6)
+#     plates['P10'] = protocol.load_labware(plate_type, 7)
+#     plates['P11'] = protocol.load_labware(plate_type, 8)
     
     #assing stock components
     stock_rack = protocol.load_labware('thermoscientificnunc_96_wellplate_2000ul', 2)
@@ -94,18 +94,18 @@ def run(protocol: protocol_api.ProtocolContext):
     p1000 = protocol.load_instrument('p1000_single_gen2', 'right', tip_racks=[p1000_tiprack])
     
     for p in taget_plates:
-        #add water
-        p1000.distribute(volume = 190*scale,
-                         source = water.wells()[0],
-                         dest = [plates[p].wells_by_name()[well_name] for well_name in list(set(protocol_template['well'].tolist()))])
-        #add components, changing tips between components
+        # #add water
+        # p1000.distribute(volume = 190*scale,
+        #                  source = water.wells()[0],
+        #                  dest = [plates[p].wells_by_name()[well_name] for well_name in list(set(protocol_template['well'].tolist()))])
+        # #add components, changing tips between components
         for c in component_names:
             component_indices=protocol_template.index[(protocol_template.ot2_label==c) & (protocol_template.plate==p)].tolist()
             trans_volumes = protocol_template[protocol_template.index.isin(component_indices)].vol.tolist() 
             dest_wells = protocol_template[protocol_template.index.isin(component_indices)].well.tolist()
             if len(list(filter(None, dest_wells))) == 0:
                  continue
-            p20.transfer(volume = trans_volumes,
+            p20.distribute(volume = trans_volumes,
                          source=components[c],
                          touch_tip=True,
                          dest = [plates[p].wells_by_name()[well_name] for well_name in dest_wells])
